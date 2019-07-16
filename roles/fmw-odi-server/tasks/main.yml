@@ -1,0 +1,29 @@
+################################################################################
+# ==> tasks for fmw-odi-server Role. Creates a odi server in an existing
+# ==> Fussion Middleware 12c R2 domain on a weblogic server. Supports 12.2.1
+# ##############################################################################
+
+# ==> Create odi server on Domain
+- name: Copy create odi server script
+  template: src=create-odi-server.py dest={{ mw_installer_folder }}
+  tags: create-odi-server
+- name: Execute create odi server script
+  shell: '{{ weblogic_home }}/common/bin/wlst.sh {{ mw_installer_folder }}/create-odi-server.py'
+  tags: create-odi-server
+    
+# ==> Start odi server
+- name: Create security folder for odi server
+  file: state=directory path={{ domains_home }}/{{ domain_name }}/servers/{{ odi_server_name }}/security
+  tags: create-odi-server
+- name: Create boot properties file for odi server
+  template: src=boot.properties dest={{ domain_home }}/servers/{{ odi_server_name }}/security/
+  tags: create-odi-server
+- name: Copy Start ODI Server Script
+  template: src=start-odi-server.py dest={{ mw_installer_folder }}
+  tags: create-odi-server
+- name: Start ODI Server
+  shell: "{{ weblogic_home }}/common/bin/wlst.sh {{ mw_installer_folder }}/start-odi-server.py"
+  tags: create-odi-server
+- name: Wait for ODI Server to startup 
+  wait_for: host={{ server_hostname }} port={{ odi_server_port }} delay=2 timeout=30
+  tags: create-odi-server

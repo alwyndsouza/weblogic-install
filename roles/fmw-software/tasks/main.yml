@@ -1,0 +1,75 @@
+################################################################################
+# ==> Tasks for install Oracle Fussion Middleware Infrastructure software 12c R2
+# ==> to an Oracle Linux 7.1 system. Supports version 12.2.1
+################################################################################
+
+# ==> Install Fussion Middleware Infrastructure Software
+- name: Create installer directory
+  file: state=directory path={{ mw_installer_folder }}
+- name: Download Fusion Middleware Installer Software
+  get_url:
+    url: "{{tods_repo}}/com/oracle/weblogic/{{mw_installer}}_{{item}}"
+    dest: "{{mw_installer_folder}}/{{mw_installer}}_{{item}}"
+    url_username: "{{ artifactory_user }}"
+    url_password: "{{ artifactory_password }}"
+    validate_certs: no
+  retries: '{{ get_url_vars.retries }}'
+  delay: '{{ get_url_vars.retries }}'
+  register: get_url_result
+  until: get_url_result is succeeded
+  with_items:
+   - Disk1_1of1.zip
+  tags: install
+- name: Download ODI  Installer Software
+  get_url:
+    url: "{{tods_repo}}/com/oracle/odi/{{odi_installer}}_{{item}}"
+    dest: "{{mw_installer_folder}}/{{odi_installer}}_{{item}}"
+    url_username: "{{ artifactory_user }}"
+    url_password: "{{ artifactory_password }}"
+    validate_certs: no
+  retries: '{{ get_url_vars.retries }}'
+  delay: '{{ get_url_vars.retries }}'
+  register: get_url_result
+  until: get_url_result is succeeded
+  with_items:
+   - Disk1_1of2.zip
+   - Disk1_2of2.zip
+  tags: install
+- name: Unzip installers
+  command: "unzip -o {{item}}"
+  with_items:
+   - "{{mw_installer}}_Disk1_1of1.zip"
+   - "{{odi_installer}}_Disk1_1of2.zip"
+   - "{{odi_installer}}_Disk1_2of2.zip"
+  args:
+   chdir: "{{ mw_installer_folder }}"
+  tags: install
+- name: Copy file for silent installation
+  template: src={{item}} dest={{ mw_installer_folder }}
+  with_items:
+   - silent-weblogic.txt
+   - silent-odi.txt
+  tags: install
+- name: Copy OraInst.loc
+  template: src=oraInst.loc dest={{ mw_installer_folder }}
+  tags: install
+- name: Increase swap space
+  become: true
+  become_user: root
+  script: "./increase_swap.sh"
+  ignore_errors: yes
+  tags: install
+- name: execute Weblogic installer
+  command: "{{ jdk_folder }}/bin/java -Xms1024m -Xmx1024m -jar {{ mw_installer_folder }}/{{ mw_installer }}.jar -silent -responseFile {{ mw_installer_folder }}/silent-weblogic.txt -invPtrLoc {{ mw_installer_folder }}/oraInst.loc"
+  register: wb_installer
+  tags: install
+- name: Weblogic installer output
+  debug: var=wb_installer
+  tags: install
+- name: execute ODI  installer
+  command: "{{ jdk_folder }}/bin/java -Xms1024m -Xmx1024m -jar {{ mw_installer_folder }}/{{ odi_installer }}.jar -silent -responseFile {{ mw_installer_folder }}/silent-odi.txt -invPtrLoc {{ mw_installer_folder }}/oraInst.loc"
+  register: odi_installer
+  tags: install
+- name: ODI  installer output
+  debug: var=odi_installer
+  tags: install

@@ -1,0 +1,7 @@
+{{ sysdba_passwd }}
+{{ datasource_password }}
+{{ supervisor_password}}
+D
+{{ work_repository }}
+{{ work_repository_password }}
+{{ encryption }}

@@ -1,0 +1,60 @@
+# Oracle os user and group
+oracle_user: 'oracle'
+oracle_group: 'oinstall'
+# Software and configuration main directory
+oracle_base: '/oracle/fmw12.2.1'
+
+# JDK installer and target folder
+
+
+java_version:  # http://www.oracle.com/technetwork/java/javase/downloads/index.html go down to JRE 8 to update these numbers
+  major: '1'
+  minor: '8'
+  patch: '131'
+
+jdk_folder: '{{ oracle_base }}/jdk{{ java_version.major }}.{{ java_version.minor }}.0_{{ java_version.patch }}'
+jdk_installation_archive: 'jdk-{{ java_version.minor }}u{{ java_version.patch }}-linux-x64.tar.gz'
+jdk_url: '{{ tods_repo }}/com/java/{{ java_version.minor }}/{{ jdk_installation_archive }}'
+
+#jdk_installation_archive: 'jdk-8u131-linux-x64.tar.gz'
+#jdk_folder: '{{ oracle_base }}/jdk1.8.0_131'
+
+
+
+# fmw installer
+mw_installer: 'fmw_12.2.1.3.0_infrastructure'
+odi_installer: 'fmw_12.2.1.3.0_odi'
+
+# generic variables
+tods_repo: "https://apro.nbnco.net.au/tds-generic"
+get_url_vars:
+  retries: 3
+  delay: 3
+artifactory_user: apro_tds_user
+artifactory_password: mOxND3Af@IOA
+
+# database settings for repository
+dbserver_name: 'tds99np.cqtdwxgp6ypj.ap-southeast-2.rds.amazonaws.com'
+dbserver_port: '1521'
+dbserver_service: 'tds99np'
+repository_prefix: 'wls12c2'
+master_user: something_like_user
+#sysdba_passwd: 'YourPwdShouldBeLongAndSecure!'
+# Domain Name
+domain_name: 'bifoundation_domain'
+
+# Nodemanager and server settings
+node_manager_listen_port: '5556'
+node_manager_listen_address: 'localhost'
+node_manager_name: 'LocalODIMachine'
+admin_server_hostname: 'localhost'
+admin_server_port: '7001'
+managed_server_name: 'bi_server1'
+managed_server_port: '7003'
+
+#odi
+supervisor_user: 'SUPERVISOR'
+work_repository: 'WORKREP'
+encryption: 'AES-128'
+odi_server_name: 'ODI_server1'
+odi_server_port: 8001

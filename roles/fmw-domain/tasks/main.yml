@@ -36,7 +36,6 @@
 #    - create-domain
 - name: Execute create domain script
   shell: "{{ middleware_common_home }}/common/bin/wlst.sh {{ mw_installer_folder }}/create-domain.py"
-  ignore_errors: True
   tags:
     - create-domain
 

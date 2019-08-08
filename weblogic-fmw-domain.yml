@@ -11,27 +11,27 @@
     - secrets.yml
   roles:
     - role: linux-wls
-#      when: nm_status != "running"
+      when: nm_status != "running"
     - role: linux-jdk
-#      when: nm_status != "running"
+      when: nm_status != "running"
     - role: fmw-software
       become: true
       become_user: '{{ oracle_user }}'
-#      when: nm_status != "running"
+      when: nm_status != "running"
     - role: fmw-domain
       become_user: '{{ oracle_user }}'
-#      when: nm_status != "running"
+      when: nm_status != "running"
     - role: node-manager
-#      when: nm_status != "running"
+      when: nm_status != "running"
     - role: start-admin-server
       become_user: '{{ oracle_user }}'
-#      when: nm_status != "running"
+      when: nm_status != "running"
     - role: fmw-managed-server
       become_user: '{{ oracle_user }}'
-#      when: nm_status != "running"
+      when: nm_status != "running"
     - role: fmw-odi-server
       become_user: '{{ oracle_user }}'
-#      when: nm_status != "running"
+      when: nm_status != "running"
   pre_tasks:
     # ==> Fix hosts file. Remove hostname from local loop. A workaround for
     # remove hostname to local loop

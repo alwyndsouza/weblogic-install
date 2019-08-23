@@ -26,14 +26,7 @@
   template: src=create-domain.py dest={{ mw_installer_folder }} owner={{ oracle_user }} group={{ oracle_group }}
   tags:
     - create-domain
-#- name: copy create domain python script
-#  template: src=create-odi-domain.py dest={{ mw_installer_folder }} owner={{ oracle_user }} group={{ oracle_group }}
-#  tags:
-#    - create-domain
-#- name: copy create domain python script
-#  template: src=createOdiDomainForJeeAgent.py dest={{ mw_installer_folder }} owner={{ oracle_user }} group={{ oracle_group }}
-#  tags:
-#    - create-domain
+
 - name: Execute create domain script
   shell: "{{ middleware_common_home }}/common/bin/wlst.sh {{ mw_installer_folder }}/create-domain.py"
   tags:

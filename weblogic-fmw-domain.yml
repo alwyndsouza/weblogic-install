@@ -1,6 +1,6 @@
 ---
 - name: Configure Oracle Linux 7.1 with WebLogic 12c R2 domain
-  hosts: localhost
+  hosts: localhost 
   become: true
   vars_files:
     # User defined variables for infrastructure
@@ -40,10 +40,11 @@
 
    - name: populate service facts
      service_facts:
-
+   
    - debug:
        var: ansible_facts.services["nodemanager.service"].state
 
    - set_fact:
-       nm_status: "{{ansible_facts.services['nodemanager.service'].state}}"
+       nm_status: "{{ansible_facts.services['nodemanager.service'].state if ansible_facts.services['nodemanager.service'] is defined else 'null' }}"
+     #when: ansible_facts.services['nodemanager.service'] is defined
 

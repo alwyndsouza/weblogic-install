@@ -13,7 +13,7 @@
   tags:
     - start-admin-server
 - name: Execute start Admin Server script
-  shell: "{{ weblogic_home }}/common/bin/wlst.sh {{ mw_installer_folder }}/start-admin-server.py"
+  shell: "{{ middleware_common_home }}/common/bin/wlst.sh {{ mw_installer_folder }}/start-admin-server.py"
   become_user: '{{ oracle_user }}'
   tags:
      - start-admin-server

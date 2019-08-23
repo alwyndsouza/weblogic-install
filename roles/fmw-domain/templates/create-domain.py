@@ -4,7 +4,7 @@ domain_configuration_home = '{{ domains_home }}/{{ domain_name }}'
 domain_name = '{{ domain_name }}'
 java_home = '{{ jdk_folder }}'
 middleware_home = '{{ middleware_home }}'
-#node_manager_home = '{{ nodemanager_home }}'
+#node_manager_home = '{{ nodemanager_home }}'  
 weblogic_home = '{{ weblogic_home }}'
 
 #database
@@ -22,11 +22,20 @@ supervisor_password = '{{ supervisor_password }}'
 nm_name = '{{ node_manager_name }}'
 nm_port = '{{ node_manager_listen_port }}'
 
-
+#admin server
 host_name = '{{ server_hostname }}'
 admin_user = '{{ weblogic_admin }}'
 admin_password = '{{ weblogic_admin_pass }}'
 admin_port = '{{ admin_server_port }}'
+
+#cluster and managed server
+server_hostname               = '{{ server_hostname }}'
+server_port                   = int('{{ managed_server_port }}')
+managed_server_name_base      = '{{ managed_server_name }}'
+number_of_ms                  = int('{{ managed_server_count }}')
+cluster_name                  = '{{ cluster_name }}'
+cluster_type                  = '{{ cluster_type }}'
+production_mode_enabled       = '{{ prod_mode_enabled }}'
 
 selectTemplate('Basic WebLogic Server Domain')
 loadTemplates()
@@ -94,6 +103,13 @@ cd('NodeManager/' + nm_name)
 set('ListenAddress', host_name)
 set('ListenPort', int(nm_port))
 
+#print('Create machine - {{ server_hostname }} ')
+#cd('/')
+#machine = create('{{ server_hostname }}', 'UnixMachine')
+##cd('/Machines/' + '{{ server_hostname }}' + '/NodeManager/' + '{{ server_hostname }}')
+#cd('/Machines/' + '{{ server_hostname }}')
+#set('ListenAddress', '{{ node_manager_listen_address }}')
+
 
 print('{{ admin_server_name }} settings.')
 cd('/Server/' + '{{ admin_server_name }}');
@@ -119,6 +135,67 @@ cmo.setUsername(supervisor_user)
 cmo.setPassword(supervisor_password)
 
 #getDatabaseDefaults()
+
+# Create a cluster
+# ================
+cd('/')
+cl=create(cluster_name, 'Cluster')
+
+if cluster_type == "CONFIGURED":
+
+  # Create managed servers
+  for index in range(0, number_of_ms):
+    cd('/')
+    msIndex = index+1
+
+    cd('/')
+    name = '%s%s' % (managed_server_name_base, msIndex)
+
+    create(name, 'Server')
+    cd('/Servers/%s/' % name )
+    print('managed server name is %s' % name);
+    set('ListenAddress', server_hostname)
+    set('ListenPort', server_port)
+    set('NumOfRetriesBeforeMSIMode', 0)
+    set('RetryIntervalBeforeMSIMode', 1)
+    set('Cluster', cluster_name)
+    set('Machine', '{{ node_manager_name }}')
+    
+
+  applyJRF(target=cluster_name , domainDir='{{ domain_home }}');
+
+else:
+  print('Configuring Dynamic Cluster %s' % cluster_name)
+
+  templateName = cluster_name + "-template"
+  print('Creating Server Template: %s' % templateName)
+  st1=create(templateName, 'ServerTemplate')
+  print('Done creating Server Template: %s' % templateName)
+  cd('/ServerTemplates/%s' % templateName)
+  cmo.setListenAddress(server_hostname)
+  cmo.setListenPort(server_port)
+  cmo.setCluster(cl)
+  #cmo.setMachine(getMBean('/Machines/' + '{{ server_hostname }}'))
+
+  cd('/Clusters/%s' % cluster_name)
+  create(cluster_name, 'DynamicServers')
+  cd('DynamicServers/%s' % cluster_name)
+  set('ServerTemplate', st1)
+  set('ServerNamePrefix', managed_server_name_base)
+  set('DynamicClusterSize', number_of_ms)
+  set('MaxDynamicClusterSize', number_of_ms)
+  set('CalculatedListenPorts', false)
+  set('CalculatedMachineNames', true)
+  set('MachineNameMatchExpression', '{{ node_manager_name }}*' )
+  applyJRF(target=cluster_name , domainDir='{{ domain_home }}');
+  print('Done setting attributes for Dynamic Cluster: %s' % cluster_name);
+  
+  cd('/')
+if production_mode_enabled == "true":
+  cmo.setProductionModeEnabled(true)
+else:
+  cmo.setProductionModeEnabled(false)
+
 
 print('Write the domain and close the template.')
 

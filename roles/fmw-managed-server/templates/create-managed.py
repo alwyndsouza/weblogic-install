@@ -1,26 +1,71 @@
-ADMIN_SERVER_URL = 't3://' + '{{ admin_server_hostname }}' + ':' + '{{ admin_server_port }}';
+domain_configuration_home     = '{{ domains_home }}/{{ domain_name }}'
+server_port                   = int('{{ managed_server_port }}')
+managed_server_name_base      = '{{ managed_server_name }}'
+number_of_ms                  = int('{{ managed_server_count }}')
+cluster_name                  = '{{ cluster_name }}'
+cluster_type                  = '{{ cluster_type }}'
+production_mode_enabled       = '{{ prod_mode_enabled }}'
 
-connect('{{ weblogic_admin }}', '{{ weblogic_admin_pass }}', ADMIN_SERVER_URL);
+print 'READ DOMAIN';
+readDomain(domain_configuration_home);
 
-edit();
-startEdit();
+# Create a cluster
+# ================
+cd('/')
+cl=create(cluster_name, 'Cluster')
+
+if cluster_type == "CONFIGURED":
+
+  # Create managed servers
+  for index in range(0, number_of_ms):
+    cd('/')
+    msIndex = index+1
+
+    cd('/')
+    name = '%s%s' % (managed_server_name_base, msIndex)
+
+    create(name, 'Server')
+    cd('/Servers/%s/' % name )
+    print('managed server name is %s' % name);
+    set('ListenPort', server_port)
+    set('NumOfRetriesBeforeMSIMode', 0)
+    set('RetryIntervalBeforeMSIMode', 1)
+    set('Cluster', cluster_name)
+
+else:
+  print('Configuring Dynamic Cluster %s' % cluster_name)
+
+  templateName = cluster_name + "-template"
+  print('Creating Server Template: %s' % templateName)
+  st1=create(templateName, 'ServerTemplate')
+  print('Done creating Server Template: %s' % templateName)
+  cd('/ServerTemplates/%s' % templateName)
+  cmo.setListenPort(server_port)
+  cmo.setCluster(cl)
+
+  cd('/Clusters/%s' % cluster_name)
+  create(cluster_name, 'DynamicServers')
+  cd('DynamicServers/%s' % cluster_name)
+  set('ServerTemplate', st1)
+  set('ServerNamePrefix', managed_server_name_base)
+  set('DynamicClusterSize', number_of_ms)
+  set('MaxDynamicClusterSize', number_of_ms)
+  set('CalculatedListenPorts', false)
+
+  print('Done setting attributes for Dynamic Cluster: %s' % cluster_name);
 
 cd('/')
-cmo.createMachine('{{ server_hostname }}')
+if production_mode_enabled == "true":
+  cmo.setProductionModeEnabled(true)
+else: 
+  cmo.setProductionModeEnabled(false)
+updateDomain()
+closeDomain()
+print 'Cluster and Managed Server Created'
+print 'Done'
 
-cd('/Machines/' + '{{ server_hostname }}' + '/NodeManager/' + '{{ server_hostname }}')
-cmo.setListenAddress('{{ node_manager_listen_address }}')
+# Exit WLST
+# =========
+exit()
 
-cd('/')
-cmo.createServer('{{ managed_server_name }}')
 
-cd('/Servers/' + '{{ managed_server_name }}')
-cmo.setListenAddress('{{ server_hostname }}')
-cmo.setListenPort({{ managed_server_port }})
-cmo.setMachine(getMBean('/Machines/' + '{{ server_hostname }}'))
-applyJRF(target='{{ managed_server_name }}', domainDir='{{ domain_home }}');
-
-# applyJRF wil call save and activate
-#save();
-#activate(block='true');
-disconnect();

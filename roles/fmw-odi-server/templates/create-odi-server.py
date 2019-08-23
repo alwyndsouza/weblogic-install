@@ -8,7 +8,7 @@ startEdit();
 cd('/')
 #machines = cmo.getMachines()
 #servers = cmo.getServers()
-#cmo.createMachine('{{ server_hostname }}')
+cmo.createMachine('{{ server_hostname }}')
 
 cd('/Machines/' + '{{ server_hostname }}' + '/NodeManager/' + '{{ server_hostname }}')
 cmo.setListenAddress('{{ node_manager_listen_address }}')

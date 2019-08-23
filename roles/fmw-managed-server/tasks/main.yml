@@ -4,19 +4,28 @@
 # ##############################################################################
 
 # ==> Create managed server on Domain
-- name: Copy create managed server script
-  template: src=create-managed.py dest={{ mw_installer_folder }}
-- name: Execute create managed server script
-  shell: '{{ weblogic_home }}/common/bin/wlst.sh {{ mw_installer_folder }}/create-managed.py'
+#- name: Copy create managed server script
+#  template: src=create-managed.py dest={{ mw_installer_folder }}
+#  tags: create-managed-server
+#- name: Execute create managed server script
+#  shell: '{{ middleware_common_home }}/common/bin/wlst.sh {{ mw_installer_folder }}/create-managed.py'
+#  tags: create-managed-server
     
 # ==> Start managed server
 - name: Create security folder for managed server
-  file: state=directory path={{ domains_home }}/{{ domain_name }}/servers/{{ managed_server_name }}/security
+  file: state=directory path={{ domains_home }}/{{ domain_name }}/servers/{{ managed_server_name }}{{ item }}/security
+  with_sequence: start=1 end={{ managed_server_count }}  format=%x
+  tags: start-managed-server
 - name: Create boot properties file for managed server
-  template: src=boot.properties dest={{ domain_home }}/servers/{{ managed_server_name }}/security/
+  template: src=boot.properties dest={{ domain_home }}/servers/{{ managed_server_name }}{{ item }}/security/
+  with_sequence: start=1 end={{ managed_server_count }}  format=%x
+  tags: start-managed-server
 - name: Copy Start Managed Server Script
   template: src=start-managed-server.py dest={{ mw_installer_folder }}
+  tags: start-managed-server
 - name: Start Managed Server
-  shell: "{{ weblogic_home }}/common/bin/wlst.sh {{ mw_installer_folder }}/start-managed-server.py"
+  shell: "{{ middleware_common_home }}/common/bin/wlst.sh {{ mw_installer_folder }}/start-managed-server.py"
+  tags: start-managed-server
 - name: Wait for Managed Server to startup 
   wait_for: host={{ server_hostname }} port={{ managed_server_port }} delay=2 timeout=30
+  tags: create-managed-server

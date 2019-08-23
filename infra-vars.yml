@@ -41,7 +41,7 @@ repository_prefix: 'wls12c2'
 master_user: something_like_user
 #sysdba_passwd: 'YourPwdShouldBeLongAndSecure!'
 # Domain Name
-domain_name: 'bifoundation_domain'
+domain_name: 'mads_domain'
 
 # Nodemanager and server settings
 node_manager_listen_port: '5556'
@@ -49,7 +49,10 @@ node_manager_listen_address: 'localhost'
 node_manager_name: 'LocalODIMachine'
 admin_server_hostname: 'localhost'
 admin_server_port: '7001'
-managed_server_name: 'bi_server1'
+cluster_name: 'mads_cluster'
+cluster_type: 'CONFIGURED'
+managed_server_count: '1'
+managed_server_name: 'mads_server'
 managed_server_port: '7003'
 
 #odi
@@ -58,3 +61,6 @@ work_repository: 'WORKREP'
 encryption: 'AES-128'
 odi_server_name: 'ODI_server1'
 odi_server_port: 8001
+
+#extra variables
+prod_mode_enabled: 'true'

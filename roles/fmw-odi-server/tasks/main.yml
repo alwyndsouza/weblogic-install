@@ -8,7 +8,7 @@
   template: src=create-odi-server.py dest={{ mw_installer_folder }}
   tags: create-odi-server
 - name: Execute create odi server script
-  shell: '{{ weblogic_home }}/common/bin/wlst.sh {{ mw_installer_folder }}/create-odi-server.py'
+  shell: '{{ middleware_common_home }}/common/bin/wlst.sh {{ mw_installer_folder }}/create-odi-server.py'
   tags: create-odi-server
     
 # ==> Start odi server
@@ -22,7 +22,7 @@
   template: src=start-odi-server.py dest={{ mw_installer_folder }}
   tags: create-odi-server
 - name: Start ODI Server
-  shell: "{{ weblogic_home }}/common/bin/wlst.sh {{ mw_installer_folder }}/start-odi-server.py"
+  shell: "{{ middleware_common_home }}/common/bin/wlst.sh {{ mw_installer_folder }}/start-odi-server.py"
   tags: create-odi-server
 - name: Wait for ODI Server to startup 
   wait_for: host={{ server_hostname }} port={{ odi_server_port }} delay=2 timeout=30

@@ -26,7 +26,7 @@ mw_installer: 'fmw_12.2.1.3.0_infrastructure'
 odi_installer: 'fmw_12.2.1.3.0_odi'
 
 # generic variables
-tods_repo: "https://apro.nbnco.net.au/tds-generic"
+tods_repo: "https://apro.net.au/tds-generic"
 get_url_vars:
   retries: 3
   delay: 3
